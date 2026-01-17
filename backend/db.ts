@@ -6,7 +6,7 @@ import dotenv from 'dotenv';
 import path from 'path';
 
 // Load .env from project root explicitly
-dotenv.config({ path: path.join(process.cwd(), '.env') });
+dotenv.config({ path: path.join(process.cwd(), '..', '.env') });
 
 if (!process.env.DATABASE_URL) {
     console.error("CRITICAL: DATABASE_URL is missing in .env");
