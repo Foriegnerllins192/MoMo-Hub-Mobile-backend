@@ -1,0 +1,20 @@
+﻿[dotenv@17.2.3] injecting env (4) from ..\.env -- tip: ΓÜÖ∩╕Å  suppress all logs with { quiet: true }
+====================================================
+=== SERVER STARTING UP - UNIQUE ID: START_001 ===
+====================================================
+DEBUG: Creating express app...
+DEBUG: App created.
+DEBUG: CORS setup.
+DEBUG: httpServer created.
+DEBUG: Setting up body parsers...
+DEBUG: Body parsers setup.
+3:22:50 PM [express] Calling registerRoutes...
+====================================================
+=== REGISTERING ROUTES - UNIQUE ID: ROUTES_001 ===
+====================================================
+3:22:51 PM [express] registerRoutes completed.
+3:22:51 PM [express] Development mode: setting up Vite
+[2m3:22:53 PM[22m [36m[1m[vite][22m[39m [90m[2m(client)[22m[39m Re-optimizing dependencies because lockfile has changed
+3:22:53 PM [express] Vite setup completed.
+3:22:53 PM [express] serving on port 5000
+

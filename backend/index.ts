@@ -111,7 +111,7 @@ app.post('/api/diag/echo', (req, res) => {
   if (process.env.NODE_ENV === "production") {
     serveStatic(app);
   } else {
-    const { setupVite } = await import("./vite");
+    const { setupVite } = await import("./vite-setup");
     await setupVite(httpServer, app);
   }
 
