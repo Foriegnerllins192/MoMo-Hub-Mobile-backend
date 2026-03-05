@@ -113,8 +113,22 @@ app.get('/health', (req, res) => {
     throw err;
   });
 
-  // API-only mode - no frontend serving needed
-  // Frontend removed, only serving API endpoints
+  // Setup Vite in development, serve static files in production
+  if (process.env.NODE_ENV === "production") {
+    // In production, serve a simple API-only response
+    app.get("*", (req, res) => {
+      if (!req.path.startsWith("/api") && !req.path.startsWith("/health")) {
+        res.json({ 
+          message: "API Server", 
+          status: "running",
+          endpoints: ["/health", "/api/*"]
+        });
+      }
+    });
+  } else {
+    const { setupVite } = await import("./vite-setup");
+    await setupVite(httpServer, app);
+  }
 
   // ALWAYS serve the app on the port specified in the environment variable PORT
   // Other ports are firewalled. Default to 5000 if not specified.

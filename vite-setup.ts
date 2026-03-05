@@ -22,7 +22,10 @@ export async function setupVite(server: Server, app: Express) {
       ...viteLogger,
       error: (msg: string, options?: LogOptions) => {
         viteLogger.error(msg, options);
-        process.exit(1);
+        // Don't exit process in production
+        if (process.env.NODE_ENV !== "production") {
+          process.exit(1);
+        }
       },
     },
     server: serverOptions,
@@ -35,19 +38,24 @@ export async function setupVite(server: Server, app: Express) {
     const url = req.originalUrl;
 
     try {
-      const clientTemplate = path.resolve(
-        __dirname,
-        "..",
-        "client",
-        "index.html",
-      );
+      // Create a basic HTML template since we don't have a client directory
+      const template = `
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>API Server</title>
+  </head>
+  <body>
+    <div id="root">
+      <h1>API Server Running</h1>
+      <p>This is a backend API server. Use the API endpoints to interact with the service.</p>
+      <p>Health check: <a href="/health">/health</a></p>
+    </div>
+  </body>
+</html>`;
 
-      // always reload the index.html file from disk incase it changes
-      let template = await fs.promises.readFile(clientTemplate, "utf-8");
-      template = template.replace(
-        `src="/src/main.tsx"`,
-        `src="/src/main.tsx?v=${nanoid()}"`,
-      );
       const page = await vite.transformIndexHtml(url, template);
       res.status(200).set({ "Content-Type": "text/html" }).end(page);
     } catch (e) {

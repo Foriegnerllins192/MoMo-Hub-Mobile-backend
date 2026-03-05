@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const vite_1 = require("vite");
 const plugin_react_1 = __importDefault(require("@vitejs/plugin-react"));
 const path_1 = __importDefault(require("path"));
+// @ts-ignore - Type definitions may not be available
 const vite_plugin_runtime_error_modal_1 = __importDefault(require("@replit/vite-plugin-runtime-error-modal"));
 exports.default = (0, vite_1.defineConfig)({
     plugins: [
@@ -14,20 +15,18 @@ exports.default = (0, vite_1.defineConfig)({
     ],
     resolve: {
         alias: {
-            "@": path_1.default.resolve(__dirname, "..", "client", "src"),
             "@shared": path_1.default.resolve(__dirname, "shared"),
-            "@assets": path_1.default.resolve(__dirname, "..", "attached_assets"),
         },
     },
-    root: path_1.default.resolve(__dirname, "..", "client"),
+    root: path_1.default.resolve(__dirname),
     build: {
-        outDir: path_1.default.resolve(__dirname, "..", "dist/public"),
+        outDir: path_1.default.resolve(__dirname, "dist/public"),
         emptyOutDir: true,
     },
     server: {
         fs: {
-            strict: true,
-            deny: ["**/.*"],
+            strict: false,
+            allow: [".."],
         },
     },
 });

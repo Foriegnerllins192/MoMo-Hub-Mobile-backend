@@ -1,4 +1,27 @@
 "use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -90,8 +113,23 @@ app.get('/health', (req, res) => {
         res.status(status).json({ message });
         throw err;
     });
-    // API-only mode - no frontend serving needed
-    // Frontend removed, only serving API endpoints
+    // Setup Vite in development, serve static files in production
+    if (process.env.NODE_ENV === "production") {
+        // In production, serve a simple API-only response
+        app.get("*", (req, res) => {
+            if (!req.path.startsWith("/api") && !req.path.startsWith("/health")) {
+                res.json({
+                    message: "API Server",
+                    status: "running",
+                    endpoints: ["/health", "/api/*"]
+                });
+            }
+        });
+    }
+    else {
+        const { setupVite } = await Promise.resolve().then(() => __importStar(require("./vite-setup")));
+        await setupVite(httpServer, app);
+    }
     // ALWAYS serve the app on the port specified in the environment variable PORT
     // Other ports are firewalled. Default to 5000 if not specified.
     // this serves both the API and the client.

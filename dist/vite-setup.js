@@ -6,9 +6,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.setupVite = setupVite;
 const vite_1 = require("vite");
 const vite_config_1 = __importDefault(require("./vite.config"));
-const fs_1 = __importDefault(require("fs"));
-const path_1 = __importDefault(require("path"));
-const nanoid_1 = require("nanoid");
 const viteLogger = (0, vite_1.createLogger)();
 async function setupVite(server, app) {
     const serverOptions = {
@@ -23,7 +20,10 @@ async function setupVite(server, app) {
             ...viteLogger,
             error: (msg, options) => {
                 viteLogger.error(msg, options);
-                process.exit(1);
+                // Don't exit process in production
+                if (process.env.NODE_ENV !== "production") {
+                    process.exit(1);
+                }
             },
         },
         server: serverOptions,
@@ -33,10 +33,23 @@ async function setupVite(server, app) {
     app.use("*", async (req, res, next) => {
         const url = req.originalUrl;
         try {
-            const clientTemplate = path_1.default.resolve(__dirname, "..", "client", "index.html");
-            // always reload the index.html file from disk incase it changes
-            let template = await fs_1.default.promises.readFile(clientTemplate, "utf-8");
-            template = template.replace(`src="/src/main.tsx"`, `src="/src/main.tsx?v=${(0, nanoid_1.nanoid)()}"`);
+            // Create a basic HTML template since we don't have a client directory
+            const template = `
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>API Server</title>
+  </head>
+  <body>
+    <div id="root">
+      <h1>API Server Running</h1>
+      <p>This is a backend API server. Use the API endpoints to interact with the service.</p>
+      <p>Health check: <a href="/health">/health</a></p>
+    </div>
+  </body>
+</html>`;
             const page = await vite.transformIndexHtml(url, template);
             res.status(200).set({ "Content-Type": "text/html" }).end(page);
         }
