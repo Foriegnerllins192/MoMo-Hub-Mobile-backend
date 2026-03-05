@@ -113,14 +113,8 @@ app.get('/health', (req, res) => {
     throw err;
   });
 
-  // Static file serving disabled - API only mode for mobile app
-  // Since we removed the web client, we don't need to serve static files
-  // if (process.env.NODE_ENV === "production") {
-  //   serveStatic(app);
-  // } else {
-  //   const { setupVite } = await import("./vite-setup");
-  //   await setupVite(httpServer, app);
-  // }
+  // API-only mode - no frontend serving needed
+  // Frontend removed, only serving API endpoints
 
   // ALWAYS serve the app on the port specified in the environment variable PORT
   // Other ports are firewalled. Default to 5000 if not specified.

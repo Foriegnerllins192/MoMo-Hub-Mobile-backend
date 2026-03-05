@@ -1,27 +1,4 @@
 "use strict";
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -33,13 +10,12 @@ console.log("=== SERVER STARTING UP - UNIQUE ID: START_001 ===");
 console.log("====================================================");
 const express_1 = __importDefault(require("express"));
 const routes_1 = require("./routes");
-const static_1 = require("./static");
 const http_1 = require("http");
 const cors_1 = __importDefault(require("cors"));
 const app = (0, express_1.default)();
 app.use((0, cors_1.default)({
-    origin: true,
-    credentials: true
+    origin: "*", // Allow all origins for mobile app access
+    credentials: false // Set to false when using origin: "*"
 }));
 const httpServer = (0, http_1.createServer)(app);
 app.use((req, res, next) => {
@@ -94,6 +70,14 @@ app.post('/api/diag/echo', (req, res) => {
         hasBody: !!req.body && Object.keys(req.body).length > 0
     });
 });
+// Health check endpoint for Render
+app.get('/health', (req, res) => {
+    res.status(200).json({
+        status: 'OK',
+        timestamp: new Date().toISOString(),
+        port: process.env.PORT || '5000'
+    });
+});
 (async () => {
     await (0, routes_1.registerRoutes)(httpServer, app);
     app.use((err, _req, res, _next) => {
@@ -106,16 +90,8 @@ app.post('/api/diag/echo', (req, res) => {
         res.status(status).json({ message });
         throw err;
     });
-    // importantly only setup vite in development and after
-    // setting up all the other routes so the catch-all route
-    // doesn't interfere with the other routes
-    if (process.env.NODE_ENV === "production") {
-        (0, static_1.serveStatic)(app);
-    }
-    else {
-        const { setupVite } = await Promise.resolve().then(() => __importStar(require("./vite-setup")));
-        await setupVite(httpServer, app);
-    }
+    // API-only mode - no frontend serving needed
+    // Frontend removed, only serving API endpoints
     // ALWAYS serve the app on the port specified in the environment variable PORT
     // Other ports are firewalled. Default to 5000 if not specified.
     // this serves both the API and the client.
@@ -126,6 +102,7 @@ app.post('/api/diag/echo', (req, res) => {
         host: "0.0.0.0",
         // reusePort: true, // Not supported on Windows
     }, () => {
+        console.log(`Server running on port ${port}`);
         log(`serving on port ${port}`);
     });
 })();
