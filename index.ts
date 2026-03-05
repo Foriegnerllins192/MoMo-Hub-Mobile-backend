@@ -4,7 +4,6 @@ console.log("=== SERVER STARTING UP - UNIQUE ID: START_001 ===");
 console.log("====================================================");
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
-import { serveStatic } from "./static";
 import { createServer } from "http";
 import cors from "cors";
 
@@ -114,15 +113,14 @@ app.get('/health', (req, res) => {
     throw err;
   });
 
-  // importantly only setup vite in development and after
-  // setting up all the other routes so the catch-all route
-  // doesn't interfere with the other routes
-  if (process.env.NODE_ENV === "production") {
-    serveStatic(app);
-  } else {
-    const { setupVite } = await import("./vite-setup");
-    await setupVite(httpServer, app);
-  }
+  // Static file serving disabled - API only mode for mobile app
+  // Since we removed the web client, we don't need to serve static files
+  // if (process.env.NODE_ENV === "production") {
+  //   serveStatic(app);
+  // } else {
+  //   const { setupVite } = await import("./vite-setup");
+  //   await setupVite(httpServer, app);
+  // }
 
   // ALWAYS serve the app on the port specified in the environment variable PORT
   // Other ports are firewalled. Default to 5000 if not specified.
